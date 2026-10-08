@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Путешествия - Испанский язык</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --success: #51CF66;
+            --error: #FF6B6B;
+            --bg: #F7F9FC;
+            --card-bg: #FFFFFF;
+            --text: #2C3E50;
+            --text-light: #7F8C8D;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        #app {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 44px;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .illustration {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+        }
+
+        .vocabulary-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .vocab-item {
+            background: linear-gradient(135deg, var(--secondary), #45B7AA);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .vocab-item span {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Task 1: Matching */
+        .matching-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .matching-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .word-card {
+            flex: 1;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 2px solid #E0E0E0;
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word-card:hover:not(.matched) {
+            border-color: var(--secondary);
+            transform: scale(1.02);
+        }
+
+        .word-card.selected {
+            border-color: var(--primary);
+            background: #FFF5F5;
+        }
+
+        .word-card.matched {
+            background: #D4EDDA;
+            border-color: var(--success);
+            cursor: default;
+        }
+
+        .word-card.wrong {
+            background: #F8D7DA;
+            border-color: var(--error);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Task 2: Fill gaps */
+        .sentence {
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin: 15px 0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .gap {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 3px solid var(--secondary);
+            margin: 0 5px;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 5px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .word-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .word-option {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: 2px solid transparent;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            min-height: 44px;
+        }
+
+        .word-option:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .word-option.used {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Task 3: Replace */
+        .replace-sentence {
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin: 15px 0;
+            font-size: 1.1rem;
+        }
+
+        .highlight-word {
+            display: inline-block;
+            background: var(--accent);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0 3px;
+        }
+
+        .highlight-word:hover {
+            background: #FFD93D;
+        }
+
+        .replacement-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #E0E0E0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            transition: width 0.5s ease;
+        }
+
+        /* Results */
+        .results-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success), #45B7AA);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: var(--radius);
+            margin: 15px 0;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            background: #D4EDDA;
+            color: #155724;
+            border: 2px solid var(--success);
+        }
+
+        .feedback.incorrect {
+            background: #F8D7DA;
+            color: #721C24;
+            border: 2px solid var(--error);
+        }
+
+        .task-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 600px) {
+            #app {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .matching-row {
+                flex-direction: column;
+            }
+
+            .illustration {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main id="app"></main>
+
+    <script>
+        // Константы: вокабуляр
+        const VOCABULARY = [
+            { es: 'el avión', ru: 'самолёт' },
+            { es: 'la playa', ru: 'пляж' },
+            { es: 'las vacaciones', ru: 'каникулы' },
+            { es: 'el pasaporte', ru: 'паспорт' },
+            { es: 'el billete del avión', ru: 'билет на самолёт' },
+            { es: 'el viaje', ru: 'путешествие' },
+            { es: 'las montañas', ru: 'горы' },
+            { es: 'el tren', ru: 'поезд' }
+        ];
+
+        // Задание 2: предложения с пропусками
+        const FILL_GAP_TASKS = [
+            { sentence: 'En ___ hace calor y hay arena.', answer: 'la playa', translation: 'На пляже жарко и есть песок.' },
+            { sentence: 'Necesito ___ para viajar a otro país.', answer: 'el pasaporte', translation: 'Мне нужен паспорт для поездки в другую страну.' },
+            { sentence: 'Vamos a ___ a España.', answer: 'el viaje', translation: 'Мы едем в путешествие в Испанию.' },
+            { sentence: 'El ___ vuela muy alto.', answer: 'el avión', translation: 'Самолёт летит очень высоко.' }
+        ];
+
+        // Задание 3: предложения с ошибками
+        const REPLACE_TASKS = [
+            { sentence: 'En la playa hay montañas.', wrong: 'montañas', correct: 'arena', translation: 'На пляже есть песок.' },
+            { sentence: 'El tren vuela en el cielo.', wrong: 'vuela', correct: 'viaja', translation: 'Поезд путешествует.' },
+            { sentence: 'Las vacaciones son en el pasaporte.', wrong: 'pasaporte', correct: 'verano', translation: 'Каникулы летом.' },
+            { sentence: 'El billete del avión es para la playa.', wrong: 'playa', correct: 'avión', translation: 'Билет на самолёт.' }
+        ];
+
+        // Утилита перемешивания массива (Fisher–Yates)
+        function shuffleArray(arr) {
+            const result = [...arr];
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        // Состояние приложения
+        const state = {
+            currentScreen: 'welcome',
+            currentTask: 1,
+            score: 0,
+            totalPossible: 16, // 8 matching + 4 fill + 4 replace
+            // Task 1
+            shuffledRussianOrder: [], // порядок индексов VOCABULARY для русских слов
+            selectedSpanish: null,    // индекс в VOCABULARY (исходный)
+            selectedRussian: null,    // индекс в VOCABULARY (исходный)
+            matchedSpanish: new Set(),// индексы VOCABULARY уже соединённых испанских слов
+            // Task 2
+            currentGapIndex: 0,
+            filledGaps: [],
+            // Task 3
+            currentReplaceIndex: 0,
+            replacedSentences: []
+        };
+
+        // Инициализация порядка русских слов (перемешать)
+        function initTask1Order() {
+            state.shuffledRussianOrder = shuffleArray(VOCABULARY.map((_, i) => i));
+            // Гарантируем, что порядок отличается от исходного (на всякий случай)
+            let attempts = 0;
+            while (attempts < 10 && state.shuffledRussianOrder.every((v, i) => v === i)) {
+                state.shuffledRussianOrder = shuffleArray(VOCABULARY.map((_, i) => i));
+                attempts++;
+            }
+        }
+
+        // Рендер экрана приветствия
+        function renderWelcome() {
+            return `
+                <div class="screen active welcome-screen">
+                    <div class="card">
+                        <svg class="illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="100" cy="100" r="90" fill="#FFE66D" opacity="0.3"/>
+                            <path d="M50 120 L100 60 L150 120 Z" fill="#4ECDC4"/>
+                            <rect x="85" y="120" width="30" height="40" fill="#FF6B6B"/>
+                            <circle cx="100" cy="140" r="5" fill="#FFE66D"/>
+                            <path d="M30 160 Q100 140 170 160" stroke="#4ECDC4" stroke-width="3" fill="none"/>
+                            <circle cx="40" cy="50" r="15" fill="#FFE66D"/>
+                            <path d="M140 40 L160 40 L150 20 Z" fill="#FF6B6B"/>
+                        </svg>
+                        <h1>¡Viajes!</h1>
+                        <h2>Путешествия</h2>
+                        <p>Изучим испанские слова о путешествиях и выполним задания!</p>
+                        
+                        <div class="vocabulary-list">
+                            ${VOCABULARY.map(v => `
+                                <div class="vocab-item">
+                                    ${v.es}
+                                    <span>${v.ru}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <button class="btn" onclick="startTasks()">¡Vamos!</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Рендер задания 1: соединение слов (русские слова перемешаны)
+        function renderTask1() {
+            const progress = (state.matchedSpanish.size / VOCABULARY.length) * 100;
+
+            return `
+                <div class="screen active">
+                    <div class="card">
+                        <h2><span class="task-number">1</span> Соедини слова</h2>
+                        <p>Нажми на испанское слово, затем на его русский перевод</p>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        
+                        <div class="matching-container">
+                            <div class="matching-row">
+                                <div style="flex:1; text-align:center; font-weight:bold; color:var(--secondary);">Español</div>
+                                <div style="flex:1; text-align:center; font-weight:bold; color:var(--primary);">Русский</div>
+                            </div>
+                            
+                            ${VOCABULARY.map((v, i) => {
+                                // Индекс русского слова в перемешанном порядке для этой строки
+                                const russianOrigIdx = state.shuffledRussianOrder[i];
+                                const russianWord = VOCABULARY[russianOrigIdx].ru;
+                                const spanishMatched = state.matchedSpanish.has(i);
+                                const russianMatched = state.matchedSpanish.has(russianOrigIdx);
+                                const spanishSelected = state.selectedSpanish === i;
+                                const russianSelected = state.selectedRussian === russianOrigIdx;
+
+                                const spanishClasses = [
+                                    'word-card',
+                                    spanishMatched ? 'matched' : '',
+                                    spanishSelected ? 'selected' : ''
+                                ].filter(Boolean).join(' ');
+
+                                const russianClasses = [
+                                    'word-card',
+                                    russianMatched ? 'matched' : '',
+                                    russianSelected ? 'selected' : ''
+                                ].filter(Boolean).join(' ');
+
+                                return `
+                                    <div class="matching-row">
+                                        <div class="${spanishClasses}" 
+                                             onclick="selectSpanish(${i})" 
+                                             data-index="${i}">
+                                            ${v.es}
+                                        </div>
+                                        <div class="${russianClasses}" 
+                                             onclick="selectRussian(${russianOrigIdx})" 
+                                             data-index="${russianOrigIdx}">
+                                            ${russianWord}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <div id="feedback1"></div>
+                        
+                        ${state.matchedSpanish.size === VOCABULARY.length ? `
+                            <button class="btn btn-success" onclick="nextTask()">Далее →</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Рендер задания 2: вставка слов
+        function renderTask2() {
+            if (state.currentGapIndex >= FILL_GAP_TASKS.length) {
+                return `
+                    <div class="screen active">
+                        <div class="card">
+                            <h2><span class="task-number">2</span> Задание выполнено!</h2>
+                            <button class="btn btn-success" onclick="nextTask()">Далее →</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const task = FILL_GAP_TASKS[state.currentGapIndex];
+            const progress = (state.currentGapIndex / FILL_GAP_TASKS.length) * 100;
+            
+            // Перемешиваем варианты
+            const options = [...VOCABULARY.map(v => v.es)].sort(() => Math.random() - 0.5).slice(0, 4);
+            if (!options.includes(task.answer)) {
+                options[Math.floor(Math.random() * 4)] = task.answer;
+            }
+
+            return `
+                <div class="screen active">
+                    <div class="card">
+                        <h2><span class="task-number">2</span> Вставь слово</h2>
+                        <p>Выбери подходящее слово для пропуска</p>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        
+                        <div class="sentence">
+                            ${task.sentence.replace('___', '<span class="gap" id="gap">?</span>')}
+                        </div>
+                        
+                        <p style="color:var(--text-light); font-style:italic;">${task.translation}</p>
+                        
+                        <div class="word-options">
+                            ${options.map(opt => `
+                                <div class="word-option" onclick="fillGap('${opt}')">${opt}</div>
+                            `).join('')}
+                        </div>
+                        
+                        <div id="feedback2"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Рендер задания 3: замена слов
+        function renderTask3() {
+            if (state.currentReplaceIndex >= REPLACE_TASKS.length) {
+                return `
+                    <div class="screen active">
+                        <div class="card">
+                            <h2><span class="task-number">3</span> Задание выполнено!</h2>
+                            <button class="btn btn-success" onclick="showResults()">Показать результат →</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const task = REPLACE_TASKS[state.currentReplaceIndex];
+            const progress = (state.currentReplaceIndex / REPLACE_TASKS.length) * 100;
+            
+            const options = [task.correct, ...VOCABULARY.map(v => v.es).filter(w => w !== task.correct).sort(() => Math.random() - 0.5).slice(0, 2)];
+            options.sort(() => Math.random() - 0.5);
+
+            return `
+                <div class="screen active">
+                    <div class="card">
+                        <h2><span class="task-number">3</span> Замени неправильное слово</h2>
+                        <p>Найди ошибку и выбери правильное слово</p>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        
+                        <div class="replace-sentence">
+                            ${task.sentence.replace(task.wrong, `<span class="highlight-word">${task.wrong}</span>`)}
+                        </div>
+                        
+                        <p style="color:var(--text-light); font-style:italic;">Перевод: ${task.translation}</p>
+                        
+                        <p><strong>Замени на:</strong></p>
+                        <div class="replacement-options">
+                            ${options.map(opt => `
+                                <div class="word-option" onclick="replaceWord('${opt}')">${opt}</div>
+                            `).join('')}
+                        </div>
+                        
+                        <div id="feedback3"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Рендер результатов
+        function renderResults() {
+            const percentage = Math.round((state.score / state.totalPossible) * 100);
+            let message = '';
+            if (percentage >= 90) message = '¡Excelente! Отлично!';
+            else if (percentage >= 70) message = '¡Muy bien! Очень хорошо!';
+            else if (percentage >= 50) message = '¡Bien! Хорошо!';
+            else message = '¡Sigue practicando! Продолжай практиковаться!';
+
+            return `
+                <div class="screen active results-screen">
+                    <div class="card">
+                        <h1>Результаты</h1>
+                        
+                        <div class="score-circle">
+                            ${state.score}/${state.totalPossible}
+                        </div>
+                        
+                        <h2>${message}</h2>
+                        <p>Правильных ответов: ${percentage}%</p>
+                        
+                        <button class="btn" onclick="restart()">Пройти ещё раз</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Обработчики
+        function startTasks() {
+            state.currentScreen = 'task1';
+            state.currentTask = 1;
+            initTask1Order();
+            render();
+        }
+
+        function selectSpanish(index) {
+            if (state.matchedSpanish.has(index)) return;
+            state.selectedSpanish = index;
+            checkMatch();
+            render();
+        }
+
+        function selectRussian(origIndex) {
+            if (state.matchedSpanish.has(origIndex)) return;
+            state.selectedRussian = origIndex;
+            checkMatch();
+            render();
+        }
+
+        // Проверка пары: если выбраны оба — сверяем индексы VOCABULARY
+        function checkMatch() {
+            if (state.selectedSpanish !== null && state.selectedRussian !== null) {
+                if (state.selectedSpanish === state.selectedRussian) {
+                    state.matchedSpanish.add(state.selectedSpanish);
+                    state.score++;
+                    showFeedback('feedback1', true, '¡Correcto! Правильно!');
+                } else {
+                    showFeedback('feedback1', false, 'Incorrecto. Попробуй ещё раз!');
+                }
+
+                state.selectedSpanish = null;
+                state.selectedRussian = null;
+            }
+        }
+
+        function fillGap(word) {
+            const task = FILL_GAP_TASKS[state.currentGapIndex];
+            const gap = document.getElementById('gap');
+            
+            if (word === task.answer) {
+                state.score++;
+                gap.textContent = word;
+                gap.style.color = 'var(--success)';
+                showFeedback('feedback2', true, '¡Correcto!');
+                setTimeout(() => {
+                    state.currentGapIndex++;
+                    render();
+                }, 1500);
+            } else {
+                showFeedback('feedback2', false, 'Incorrecto. Попробуй другое слово!');
+            }
+        }
+
+        function replaceWord(word) {
+            const task = REPLACE_TASKS[state.currentReplaceIndex];
+            
+            if (word === task.correct) {
+                state.score++;
+                showFeedback('feedback3', true, '¡Correcto!');
+                setTimeout(() => {
+                    state.currentReplaceIndex++;
+                    render();
+                }, 1500);
+            } else {
+                showFeedback('feedback3', false, 'Incorrecto. Попробуй другое слово!');
+            }
+        }
+
+        function nextTask() {
+            state.currentTask++;
+            if (state.currentTask === 2) {
+                state.currentScreen = 'task2';
+            } else if (state.currentTask === 3) {
+                state.currentScreen = 'task3';
+            }
+            render();
+        }
+
+        function showResults() {
+            state.currentScreen = 'results';
+            render();
+        }
+
+        function restart() {
+            state.currentScreen = 'welcome';
+            state.currentTask = 1;
+            state.score = 0;
+            state.selectedSpanish = null;
+            state.selectedRussian = null;
+            state.matchedSpanish = new Set();
+            state.shuffledRussianOrder = [];
+            state.currentGapIndex = 0;
+            state.filledGaps = [];
+            state.currentReplaceIndex = 0;
+            state.replacedSentences = [];
+            render();
+        }
+
+        function showFeedback(elementId, isCorrect, message) {
+            const feedback = document.getElementById(elementId);
+            if (feedback) {
+                feedback.innerHTML = `
+                    <div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">
+                        ${message}
+                    </div>
+                `;
+            }
+        }
+
+        // Основной рендер
+        function render() {
+            const app = document.getElementById('app');
+            
+            switch(state.currentScreen) {
+                case 'welcome':
+                    app.innerHTML = renderWelcome();
+                    break;
+                case 'task1':
+                    app.innerHTML = renderTask1();
+                    break;
+                case 'task2':
+                    app.innerHTML = renderTask2();
+                    break;
+                case 'task3':
+                    app.innerHTML = renderTask3();
+                    break;
+                case 'results':
+                    app.innerHTML = renderResults();
+                    break;
+            }
+        }
+
+        // Инициализация
+        render();
+    </script>
+</body>
+</html>
